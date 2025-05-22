@@ -17,10 +17,14 @@
       margin: 0 auto;
       padding: 16px;
     }
+    .ad-top {
+      text-align: center;
+      margin-bottom: 20px;
+    }
     .title-bar {
       font-size: 1.3rem;
       font-weight: bold;
-      margin: 12px 0;
+      margin-bottom: 12px;
       text-align: center;
     }
     .player-wrapper {
@@ -43,23 +47,17 @@
       text-align: center;
       font-weight: bold;
     }
-    .ad-iframe {
-      width: 100%;
-      height: 100px;
-      border: none;
-      margin-bottom: 10px;
-    }
   </style>
 </head>
 <body>
   <div class="container">
 
-    <!-- Top Ad (Iframe from ads.html) -->
-    <iframe 
-      src="ads.html" 
-      class="ad-iframe"
-      scrolling="no">
-    </iframe>
+    <!-- Top Ad with New Zone ID -->
+    <div class="ad-top">
+      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script> 
+      <ins class="eas6a97888e37" data-zoneid="5619492"></ins> 
+      <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
+    </div>
 
     <div class="title-bar">Video Player</div>
 
