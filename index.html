@@ -28,6 +28,21 @@
       margin-bottom: 8px;
       text-align: center;
     }
+    .player-wrapper {
+      width: 100%;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+      position: relative;
+      margin-bottom: 10px;
+    }
+    .player-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      pointer-events: none; /* block initially */
+    }
     .timer-box {
       display: flex;
       flex-direction: column;
@@ -56,21 +71,6 @@
       50% { transform: scale(1.1); opacity: 0.7; }
       100% { transform: scale(1); opacity: 1; }
     }
-    .player-wrapper {
-      width: 100%;
-      aspect-ratio: 16/9;
-      overflow: hidden;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.1);
-      position: relative;
-      margin-bottom: 20px;
-    }
-    .player-wrapper iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      pointer-events: none; /* initially block interaction */
-    }
     .warning {
       color: #ff4d4d;
       font-size: 14px;
@@ -96,12 +96,6 @@
 
     <div class="title-bar">Video Player</div>
 
-    <!-- Timer Below Title -->
-    <div class="timer-box" id="timerBox">
-      <div class="countdown-circle" id="timer">20</div>
-      <div class="timer-text">Please wait... video will unlock</div>
-    </div>
-
     <!-- Video Player -->
     <div class="player-wrapper">
       <iframe 
@@ -112,7 +106,12 @@
       </iframe>
     </div>
 
-    <!-- Warning Below Player -->
+    <!-- Timer After Player -->
+    <div class="timer-box" id="timerBox">
+      <div class="countdown-circle" id="timer">20</div>
+      <div class="timer-text">Please wait... video will unlock</div>
+    </div>
+
     <div class="warning">
       Tap many time on play button to play the video
     </div>
@@ -138,7 +137,7 @@
       if (seconds <= 0) {
         clearInterval(countdown);
         timerBox.style.display = 'none';
-        iframe.style.pointerEvents = 'auto'; // enable click
+        iframe.style.pointerEvents = 'auto'; // enable video click
       }
     }, 1000);
   </script>
