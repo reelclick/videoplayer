@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
   <meta charset="UTF-8" />
   <title>Add Video - FileHub Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,10 +16,13 @@
 </head>
 <body>
   <h2>Add New Video Link</h2>
+  <input type="text" id="fileName" placeholder="Enter File Name (optional)" />
   <input type="text" id="embedLink" placeholder="Enter MixDrop Embed URL" />
   <button onclick="addVideo()">Generate Video Link</button>
-  <div id="link"></div>  <h3>Existing Videos</h3>
-  <div id="videoList"></div>  <script>
+  <div id="link"></div>
+  <h3>Existing Videos</h3>
+  <div id="videoList"></div>
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
       authDomain: "videoplayer-e9214.firebaseapp.com",
@@ -31,72 +33,78 @@
       appId: "1:129519902158:web:35db9dc21947cd3b881f9f"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    function addVideo() {
-      const link = document.getElementById('embedLink').value;
-      if (!link) return;
-      const id = 'vid' + Date.now();
-      db.ref('videos/' + id).set({ embed: link }, () => {
-        document.getElementById('link').innerHTML = `✅ Link: <a style='color:#4dfc91' href='video.html?id=${id}' target='_blank'>video.html?id=${id}</a>`;
-        document.getElementById('embedLink').value = "";
-        loadVideos();
-      });
-    }
-
-    function updateVideo(id, newLink) {
-      db.ref('videos/' + id).update({ embed: newLink }, () => {
-        loadVideos();
-      });
-    }
-
-    function deleteVideo(id) {
-      db.ref('videos/' + id).remove(() => {
-        loadVideos();
-      });
-    }
-
-    function loadVideos() {
-      db.ref('videos').once('value').then(snapshot => {
-        const list = document.getElementById('videoList');
-        list.innerHTML = '';
-        const data = snapshot.val();
-        for (let id in data) {
-          const entry = document.createElement('div');
-          entry.className = 'video-entry';
-
-          const input = document.createElement('input');
-          input.value = data[id].embed;
-
-          const actions = document.createElement('div');
-          actions.className = 'actions';
-
-          const viewBtn = document.createElement('a');
-          viewBtn.href = `video.html?id=${id}`;
-          viewBtn.target = '_blank';
-          viewBtn.textContent = '▶️ View';
-          viewBtn.style.marginRight = '10px';
-          viewBtn.style.color = '#4dfc91';
-
-          const editBtn = document.createElement('button');
-          editBtn.textContent = '✏️ Edit';
-          editBtn.onclick = () => updateVideo(id, input.value);
-
-          const deleteBtn = document.createElement('button');
-          deleteBtn.textContent = '🗑️ Delete';
-          deleteBtn.onclick = () => deleteVideo(id);
-
-          actions.appendChild(viewBtn);
-          actions.appendChild(editBtn);
-          actions.appendChild(deleteBtn);
-
-          entry.appendChild(input);
-          entry.appendChild(actions);
-          list.appendChild(entry);
-        }
-      });
-    }
-
+    const db = firebase.database();function addVideo() {
+  const link = document.getElementById('embedLink').value;
+  const name = document.getElementById('fileName').value || 'Untitled';
+  if (!link) return;
+  const id = 'vid' + Date.now();
+  db.ref('videos/' + id).set({ embed: link, name: name }, () => {
+    document.getElementById('link').innerHTML = `✅ Link: <a style='color:#4dfc91' href='video.html?id=${id}' target='_blank'>video.html?id=${id}</a>`;
+    document.getElementById('embedLink').value = "";
+    document.getElementById('fileName').value = "";
     loadVideos();
-  </script></body>
+  });
+}
+
+function updateVideo(id, newLink, newName) {
+  db.ref('videos/' + id).update({ embed: newLink, name: newName }, () => {
+    loadVideos();
+  });
+}
+
+function deleteVideo(id) {
+  db.ref('videos/' + id).remove(() => {
+    loadVideos();
+  });
+}
+
+function loadVideos() {
+  db.ref('videos').once('value').then(snapshot => {
+    const list = document.getElementById('videoList');
+    list.innerHTML = '';
+    const data = snapshot.val();
+    for (let id in data) {
+      const entry = document.createElement('div');
+      entry.className = 'video-entry';
+
+      const nameInput = document.createElement('input');
+      nameInput.value = data[id].name || 'Untitled';
+
+      const embedInput = document.createElement('input');
+      embedInput.value = data[id].embed;
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+
+      const viewBtn = document.createElement('a');
+      viewBtn.href = `video.html?id=${id}`;
+      viewBtn.target = '_blank';
+      viewBtn.textContent = '▶️ View';
+      viewBtn.style.marginRight = '10px';
+      viewBtn.style.color = '#4dfc91';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = '💾 Save';
+      saveBtn.onclick = () => updateVideo(id, embedInput.value, nameInput.value);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '🗑️ Delete';
+      deleteBtn.onclick = () => deleteVideo(id);
+
+      actions.appendChild(viewBtn);
+      actions.appendChild(saveBtn);
+      actions.appendChild(deleteBtn);
+
+      entry.appendChild(nameInput);
+      entry.appendChild(embedInput);
+      entry.appendChild(actions);
+      list.appendChild(entry);
+    }
+  });
+}
+
+loadVideos();
+
+  </script>
+</body>
 </html>
