@@ -1,28 +1,77 @@
 <!DOCTYPE html><html lang="en"><head>
-  <meta charset="UTF-8" />
-  <title>Add Video - FileHub Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Watch Video - FileHub.live</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="6a97888e-site-verification" content="21b919f2ba8ad5fa768287f5f9f36822">
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #000; color: #fff; }
-    input, button { padding: 10px; width: 100%; margin-top: 10px; border: none; border-radius: 4px; }
-    input { background: #111; color: #fff; }
-    button { background: #ff4d4d; color: white; cursor: pointer; }
-    #link, #videoList { margin-top: 20px; font-size: 14px; word-break: break-word; }
-    .video-entry { border: 1px solid #333; padding: 10px; margin-top: 10px; border-radius: 5px; }
-    .actions button { margin-right: 10px; margin-top: 5px; }
+    body { margin: 0; background: #000; color: #fff; font-family: Arial, sans-serif; overflow-x: hidden; }
+    .container { max-width: 720px; margin: 0 auto; padding: 16px; position: relative; }
+    .title-bar { font-size: 1.3rem; font-weight: bold; margin-bottom: 8px; text-align: center; }
+    .ad-top { text-align: center; margin-bottom: 20px; opacity: 0.4; pointer-events: none; }
+    .player-wrapper { width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.1); position: relative; margin-bottom: 10px; }
+    .player-wrapper iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
+    .warning { color: #ff4d4d; font-size: 14px; margin-top: 10px; text-align: center; font-weight: bold; }
+    .ad-video-slider { text-align: center; margin-top: 20px; opacity: 0.4; pointer-events: none; }
+    .fullscreen-lock {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 18px;
+      z-index: 9999;
+    }
+    .fullscreen-lock .countdown-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background-color: #ff4d4d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: bold;
+      animation: pulse 1s infinite;
+      margin-top: 12px;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
-  <h2>Add New Video Link</h2>
-  <input type="text" id="fileName" placeholder="Enter File Name (optional)" />
-  <input type="text" id="embedLink" placeholder="Enter MixDrop Embed URL" />
-  <button onclick="addVideo()">Generate Video Link</button>
-  <div id="link"></div>
-  <h3>Existing Videos</h3>
-  <div id="videoList"></div>
-  <script>
+  <div class="fullscreen-lock" id="fullscreenLock">
+    Page is locked<br>
+    <div class="countdown-circle" id="timer">20</div>
+  </div>  <div class="container">
+    <div class="ad-top" id="topAd">
+      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
+      <ins class="eas6a97888e37" data-zoneid="5619492"></ins>
+      <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
+    </div><div class="title-bar">Video Player</div>
+<div class="player-wrapper">
+  <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
+</div>
+<div class="warning">Tap many time on play button to play the video</div>
+
+<div class="ad-video-slider" id="sliderAd">
+  <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
+  <ins class="eas6a97888e31" data-zoneid="5619516"></ins>
+  <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
+</div>
+
+  </div>  <div id="adblockMessage" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px;text-align:center;padding:20px">
+    <p>⚠️ Please disable your ad blocker and refresh the page to continue viewing this video.</p>
+  </div>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
       authDomain: "videoplayer-e9214.firebaseapp.com",
@@ -33,138 +82,54 @@
       appId: "1:129519902158:web:35db9dc21947cd3b881f9f"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();function addVideo() {
-  const link = document.getElementById('embedLink').value;
-  const name = document.getElementById('fileName').value || 'Untitled';
-  if (!link) return;
-  const id = 'vid' + Date.now();
-  db.ref('videos/' + id).set({ embed: link, name: name }, () => {
-    document.getElementById('link').innerHTML = `✅ Link: <a style='color:#4dfc91' href='video.html?id=${id}' target='_blank'>video.html?id=${id}</a> <button onclick=\"navigator.clipboard.writeText(window.location.origin + '/video.html?id=${id}')\">📋 Copy</button>`;
-    document.getElementById('embedLink').value = "";
-    document.getElementById('fileName').value = "";
-    loadVideos();
-  });
-}
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    firebase.database().ref('videos/' + id).once('value').then(snapshot => {
+      const embedLink = snapshot.val()?.embed;
+      if (!embedLink) return alert('Invalid or missing video.');
+      const iframe = document.getElementById('videoPlayer');
+      iframe.src = embedLink;
 
-function updateVideo(id, newLink, newName) {
-  db.ref('videos/' + id).update({ embed: newLink, name: newName }, () => {
-    loadVideos();
-  });
-}
+      let seconds = 20;
+      const overlay = document.getElementById('fullscreenLock');
+      const timer = document.getElementById('timer');
+      const countdown = setInterval(() => {
+        seconds--;
+        timer.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(countdown);
+          overlay.style.display = 'none';
+          iframe.style.pointerEvents = 'auto';
+          document.getElementById('sliderAd').style.opacity = '1';
+          document.getElementById('sliderAd').style.pointerEvents = 'auto';
+          document.getElementById('topAd').style.opacity = '1';
+          document.getElementById('topAd').style.pointerEvents = 'auto';
+        }
+      }, 1000);
+    });
 
-function deleteVideo(id) {
-  db.ref('videos/' + id).remove(() => {
-    loadVideos();
-  });
-}
-
-function loadVideos() {
-  db.ref('videos').once('value').then(snapshot => {
-    const list = document.getElementById('videoList');
-    list.innerHTML = '';
-    const data = snapshot.val();
-    for (let id in data) {
-      const entry = document.createElement('div');
-      entry.className = 'video-entry';
-
-      const nameInput = document.createElement('input');
-      nameInput.value = data[id].name || 'Untitled';
-
-      const embedInput = document.createElement('input');
-      embedInput.value = data[id].embed;
-
-      const actions = document.createElement('div');
-      actions.className = 'actions';
-
-      const viewBtn = document.createElement('a');
-      viewBtn.href = `video.html?id=${id}`;
-      viewBtn.target = '_blank';
-      viewBtn.textContent = '▶️ View';
-      const copyBtn = document.createElement('button');
-      copyBtn.textContent = '📋 Copy';
-      copyBtn.onclick = () => navigator.clipboard.writeText(window.location.origin + `/video.html?id=${id}`);
-      actions.appendChild(copyBtn);
-      viewBtn.style.marginRight = '10px';
-      viewBtn.style.color = '#4dfc91';
-
-      const saveBtn = document.createElement('button');
-      saveBtn.textContent = '💾 Save';
-      saveBtn.onclick = () => updateVideo(id, embedInput.value, nameInput.value);
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = '🗑️ Delete';
-      deleteBtn.onclick = () => {
-
-if (confirm('Are you sure you want to delete this video?')) deleteVideo(id); };
-
-actions.appendChild(viewBtn);
-      actions.appendChild(saveBtn);
-      actions.appendChild(deleteBtn);
-
-      entry.appendChild(nameInput);
-      entry.appendChild(embedInput);
-      entry.appendChild(actions);
-      list.appendChild(entry);
-    }
-  });
-}
-
-loadVideos();
-
-  </script>
-<div id="adblock-warning" style="display:none; background:#111; color:#ff4d4d; text-align:center; padding:16px; font-size:16px; font-weight:bold;">
-  Please disable your ad blocker and refresh the page.
-</div>
-<script>
-  window.addEventListener('load', function () {
-    const bait = document.createElement('div');
-    bait.className = 'ad-banner';
-    bait.style.height = '1px';
-    bait.style.position = 'absolute';
-    bait.style.top = '-1000px';
-    document.body.appendChild(bait);setTimeout(() => {
-  if (!bait.offsetHeight) {
-    document.getElementById('adblock-warning').style.display = 'block';
-    document.querySelector('.container').style.display = 'none';
-  }
-  bait.remove();
-}, 100);
-
-}); </script>
-
-<div id="adblockMessage" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px;text-align:center;padding:20px">
-  <p>⚠️ Please disable your ad blocker and refresh the page to continue viewing this video.</p>
-</div>
-<script>
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const testAd = document.createElement('div');
-      testAd.innerHTML = '&nbsp;';
-      testAd.className = 'adsbox';
-      testAd.style.display = 'block';
-      testAd.style.position = 'absolute';
-      testAd.style.height = '1px';
-      testAd.style.width = '1px';
-      document.body.appendChild(testAd);
+    window.addEventListener('load', () => {
       setTimeout(() => {
-        if (testAd.offsetHeight === 0 || testAd.offsetParent === null) {
+        const bait = document.createElement('div');
+        bait.className = 'ad_unit adsbox';
+        bait.style.height = '1px';
+        bait.style.width = '1px';
+        bait.style.position = 'absolute';
+        bait.style.left = '-9999px';
+        document.body.appendChild(bait);
+
+        const adCheck = document.querySelector('.eas6a97888e31');
+
+        const isAdBlocked =
+          (bait.offsetHeight === 0 || bait.offsetParent === null) ||
+          (!adCheck || adCheck.offsetHeight === 0 || adCheck.offsetParent === null);
+
+        if (isAdBlocked) {
           document.getElementById('adblockMessage').style.display = 'flex';
         }
-        testAd.remove();
-      }, 100);
-    }, 100);
-  });
-</script>
-<div id="adblockMessage" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px;text-align:center;padding:20px">
-  <p>⚠️ Please disable your ad blocker and refresh the page to continue viewing this video.</p>
-</div><script>
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const adCheck = document.querySelector('.eas6a97888e31');
-      if (!adCheck || adCheck.offsetHeight === 0 || adCheck.offsetParent === null) {
-        document.getElementById('adblockMessage').style.display = 'flex';
-      }
-    }, 800);
-  });
-</script></body>
+
+        bait.remove();
+      }, 2000);
+    });
+  </script></body>
 </html>
