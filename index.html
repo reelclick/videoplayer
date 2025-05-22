@@ -17,8 +17,12 @@
       margin: 0 auto;
       padding: 16px;
     }
+    .ad-top {
+      text-align: center;
+      margin-bottom: 20px;
+    }
     .title-bar {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: bold;
       margin-bottom: 12px;
       text-align: center;
@@ -29,7 +33,6 @@
       overflow: hidden;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(255,255,255,0.1);
-      margin-bottom: 20px;
     }
     .player-wrapper iframe {
       width: 100%;
@@ -37,16 +40,19 @@
       border: none;
       sandbox: allow-scripts allow-same-origin allow-presentation;
     }
-    .ad-bottom {
-      text-align: center;
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
   <div class="container">
 
-    <div class="title-bar">File: Viral Dance Clip (MixDrop)</div>
+    <!-- Top Ad -->
+    <div class="ad-top">
+      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script> 
+      <ins class="eas6a97888e37" data-zoneid="5619476"></ins> 
+      <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
+    </div>
+
+    <div class="title-bar">Video Player</div>
 
     <div class="player-wrapper">
       <iframe 
@@ -54,13 +60,6 @@
         allowfullscreen
         sandbox="allow-scripts allow-same-origin allow-presentation">
       </iframe>
-    </div>
-
-    <!-- Outstream Ad Below Player -->
-    <div class="ad-bottom">
-      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script> 
-      <ins class="eas6a97888e37" data-zoneid="5619476"></ins> 
-      <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
     </div>
 
   </div>
