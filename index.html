@@ -5,141 +5,70 @@
   <title>Watch Video - FileHub.live</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="6a97888e-site-verification" content="21b919f2ba8ad5fa768287f5f9f36822">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: Arial, sans-serif;
-    }
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 16px;
-      position: relative;
-    }
-    .ad-top {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .title-bar {
-      font-size: 1.3rem;
-      font-weight: bold;
-      margin-bottom: 8px;
-      text-align: center;
-    }
-    .player-wrapper {
-      width: 100%;
-      aspect-ratio: 16/9;
-      overflow: hidden;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.1);
-      position: relative;
-      margin-bottom: 10px;
-    }
-    .player-wrapper iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      pointer-events: none; /* block initially */
-    }
-    .timer-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 15px;
-    }
-    .countdown-circle {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background-color: #ff4d4d;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      animation: pulse 1s infinite;
-      margin-bottom: 8px;
-    }
-    .timer-text {
-      font-size: 14px;
-      color: #ddd;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.7; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .warning {
-      color: #ff4d4d;
-      font-size: 14px;
-      margin-top: 10px;
-      text-align: center;
-      font-weight: bold;
-    }
-    .ad-video-slider {
-      text-align: center;
-      margin-top: 20px;
-    }
+    body { margin: 0; background: #000; color: #fff; font-family: Arial, sans-serif; }
+    .container { max-width: 720px; margin: 0 auto; padding: 16px; position: relative; }
+    .title-bar { font-size: 1.3rem; font-weight: bold; margin-bottom: 8px; text-align: center; }
+    .player-wrapper { width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.1); position: relative; margin-bottom: 10px; }
+    .player-wrapper iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
+    .timer-box { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; }
+    .countdown-circle { width: 80px; height: 80px; border-radius: 50%; background-color: #ff4d4d; display: flex; align-items: center; justify-content: center; font-size: 20px; animation: pulse 1s infinite; margin-bottom: 8px; }
+    .timer-text { font-size: 14px; color: #ddd; }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+    .warning { color: #ff4d4d; font-size: 14px; margin-top: 10px; text-align: center; font-weight: bold; }
+    .ad-video-slider { text-align: center; margin-top: 20px; }
   </style>
 </head>
 <body>
   <div class="container">
-
-    <!-- Top Banner Ad -->
-    <div class="ad-top">
-      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script> 
-      <ins class="eas6a97888e37" data-zoneid="5619492"></ins> 
-      <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
-    </div>
-
     <div class="title-bar">Video Player</div>
-
-    <!-- Video Player -->
     <div class="player-wrapper">
-      <iframe 
-        src="https://mxdrop.to/e/xw0vlv3xce1rql"
-        allowfullscreen
-        sandbox="allow-scripts allow-same-origin allow-presentation"
-        id="videoPlayer">
-      </iframe>
+      <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
     </div>
-
-    <!-- Timer After Player -->
     <div class="timer-box" id="timerBox">
       <div class="countdown-circle" id="timer">20</div>
       <div class="timer-text">Please wait... video will unlock</div>
     </div>
-
-    <div class="warning">
-      Tap many time on play button to play the video
-    </div>
-
-    <!-- Video Slider Ad -->
+    <div class="warning">Tap many time on play button to play the video</div>
     <div class="ad-video-slider">
-      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script> 
-      <ins class="eas6a97888e31" data-zoneid="5619516"></ins> 
+      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
+      <ins class="eas6a97888e31" data-zoneid="5619516"></ins>
       <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
     </div>
-
   </div>
-
   <script>
-    let seconds = 20;
-    const timerBox = document.getElementById('timerBox');
-    const timer = document.getElementById('timer');
-    const iframe = document.getElementById('videoPlayer');
-
-    const countdown = setInterval(() => {
-      seconds--;
-      timer.textContent = seconds;
-      if (seconds <= 0) {
-        clearInterval(countdown);
-        timerBox.style.display = 'none';
-        iframe.style.pointerEvents = 'auto'; // enable video click
-      }
-    }, 1000);
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    firebase.database().ref('videos/' + id).once('value').then(snapshot => {
+      const embedLink = snapshot.val()?.embed;
+      if (!embedLink) return alert('Invalid or missing video.');
+      const iframe = document.getElementById('videoPlayer');
+      iframe.src = embedLink;
+      let seconds = 20;
+      const timerBox = document.getElementById('timerBox');
+      const timer = document.getElementById('timer');
+      const countdown = setInterval(() => {
+        seconds--;
+        timer.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(countdown);
+          timerBox.style.display = 'none';
+          iframe.style.pointerEvents = 'auto';
+        }
+      }, 1000);
+    });
   </script>
 </body>
 </html>
