@@ -2,77 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Watch Video - FileHub.live</title>
+  <title>Ad Popup Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="6a97888e-site-verification" content="21b919f2ba8ad5fa768287f5f9f36822">
   <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: Arial, sans-serif;
+    body { margin: 0; font-family: Arial, sans-serif; background: #000; color: #fff; }
+
+    /* Popup Styles */
+    #adPopup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 9999;
     }
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    .ad-top {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .title-bar {
-      font-size: 1.3rem;
-      font-weight: bold;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    .player-wrapper {
-      width: 100%;
-      aspect-ratio: 16/9;
-      overflow: hidden;
+
+    .ad-box {
+      width: 90%;
+      max-width: 600px;
+      background: #111;
+      padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.1);
-    }
-    .player-wrapper iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      sandbox: allow-scripts allow-same-origin allow-presentation;
-    }
-    .warning {
-      color: #ff4d4d;
-      font-size: 14px;
-      margin-top: 10px;
       text-align: center;
-      font-weight: bold;
+    }
+
+    #closeAdBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    #closeAdBtn.enabled {
+      cursor: pointer;
+      opacity: 1;
+      background: red;
     }
   </style>
 </head>
 <body>
-  <div class="container">
 
-    <!-- Top Ad with New Zone ID -->
-    <div class="ad-top">
+<!-- Popup Ad -->
+<div id="adPopup">
+  <div class="ad-box">
+    <div id="magsrv-ad">
       <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script> 
       <ins class="eas6a97888e37" data-zoneid="5619492"></ins> 
       <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
     </div>
-
-    <div class="title-bar">Video Player</div>
-
-    <div class="player-wrapper">
-      <iframe 
-        src="https://mxdrop.to/e/xw0vlv3xce1rql"
-        allowfullscreen
-        sandbox="allow-scripts allow-same-origin allow-presentation">
-      </iframe>
-    </div>
-
-    <div class="warning">
-      Tap many time on play button to play the video
-    </div>
-
+    <button id="closeAdBtn" disabled>Close Ad</button>
   </div>
+</div>
+
+<!-- Main Content -->
+<div class="container" style="padding: 20px; text-align: center;">
+  <h1>Video Player Page</h1>
+  <p>Ad will auto-close after 20 seconds.</p>
+</div>
+
+<script>
+  const btn = document.getElementById("closeAdBtn");
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.classList.add("enabled");
+    btn.innerText = "Close Ad";
+  }, 20000);
+
+  btn.addEventListener("click", () => {
+    document.getElementById("adPopup").style.display = "none";
+  });
+</script>
+
 </body>
 </html>
