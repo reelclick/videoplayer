@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Add Video - FileHub Admin</title>
@@ -11,36 +10,93 @@
     input, button { padding: 10px; width: 100%; margin-top: 10px; border: none; border-radius: 4px; }
     input { background: #111; color: #fff; }
     button { background: #ff4d4d; color: white; cursor: pointer; }
-    #link { margin-top: 15px; font-size: 14px; word-break: break-all; }
+    #link, #videoList { margin-top: 20px; font-size: 14px; word-break: break-word; }
+    .video-entry { border: 1px solid #333; padding: 10px; margin-top: 10px; border-radius: 5px; }
+    .actions button { margin-right: 10px; margin-top: 5px; }
   </style>
 </head>
 <body>
   <h2>Add New Video Link</h2>
   <input type="text" id="embedLink" placeholder="Enter MixDrop Embed URL" />
   <button onclick="addVideo()">Generate Video Link</button>
-  <div id="link"></div>
-
-  <script>
+  <div id="link"></div>  <h3>Existing Videos</h3>
+  <div id="videoList"></div>  <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
-  authDomain: "videoplayer-e9214.firebaseapp.com",
-  databaseURL: "https://videoplayer-e9214-default-rtdb.firebaseio.com",
-  projectId: "videoplayer-e9214",
-  storageBucket: "videoplayer-e9214.firebasestorage.app",
-  messagingSenderId: "129519902158",
-  appId: "1:129519902158:web:35db9dc21947cd3b881f9f",
-  measurementId: "G-R5Z49VZCB9"
-};
+      apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
+      authDomain: "videoplayer-e9214.firebaseapp.com",
+      databaseURL: "https://videoplayer-e9214-default-rtdb.firebaseio.com",
+      projectId: "videoplayer-e9214",
+      storageBucket: "videoplayer-e9214.firebasestorage.app",
+      messagingSenderId: "129519902158",
+      appId: "1:129519902158:web:35db9dc21947cd3b881f9f"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     function addVideo() {
       const link = document.getElementById('embedLink').value;
+      if (!link) return;
       const id = 'vid' + Date.now();
       db.ref('videos/' + id).set({ embed: link }, () => {
         document.getElementById('link').innerHTML = `✅ Link: <a style='color:#4dfc91' href='video.html?id=${id}' target='_blank'>video.html?id=${id}</a>`;
+        document.getElementById('embedLink').value = "";
+        loadVideos();
       });
     }
-  </script>
-</body>
+
+    function updateVideo(id, newLink) {
+      db.ref('videos/' + id).update({ embed: newLink }, () => {
+        loadVideos();
+      });
+    }
+
+    function deleteVideo(id) {
+      db.ref('videos/' + id).remove(() => {
+        loadVideos();
+      });
+    }
+
+    function loadVideos() {
+      db.ref('videos').once('value').then(snapshot => {
+        const list = document.getElementById('videoList');
+        list.innerHTML = '';
+        const data = snapshot.val();
+        for (let id in data) {
+          const entry = document.createElement('div');
+          entry.className = 'video-entry';
+
+          const input = document.createElement('input');
+          input.value = data[id].embed;
+
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+
+          const viewBtn = document.createElement('a');
+          viewBtn.href = `video.html?id=${id}`;
+          viewBtn.target = '_blank';
+          viewBtn.textContent = '▶️ View';
+          viewBtn.style.marginRight = '10px';
+          viewBtn.style.color = '#4dfc91';
+
+          const editBtn = document.createElement('button');
+          editBtn.textContent = '✏️ Edit';
+          editBtn.onclick = () => updateVideo(id, input.value);
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = '🗑️ Delete';
+          deleteBtn.onclick = () => deleteVideo(id);
+
+          actions.appendChild(viewBtn);
+          actions.appendChild(editBtn);
+          actions.appendChild(deleteBtn);
+
+          entry.appendChild(input);
+          entry.appendChild(actions);
+          list.appendChild(entry);
+        }
+      });
+    }
+
+    loadVideos();
+  </script></body>
 </html>
