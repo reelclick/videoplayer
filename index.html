@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Watch Video - FileHub.live</title>
+  <title>Watch Video - ReelStory.live</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="6a97888e-site-verification" content="21b919f2ba8ad5fa768287f5f9f36822">
   <style>
@@ -23,44 +23,45 @@
       margin-bottom: 12px;
       text-align: center;
     }
+    .player-wrapper {
+      width: 100%;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
     .player-wrapper iframe {
       width: 100%;
-      height: 400px;
+      height: 100%;
       border: none;
-      border-radius: 10px;
     }
     .ad-bottom {
-      width: 100%;
-      max-width: 720px;
-      height: 80px;
-      background: #1a1a1a;
-      margin: 20px auto;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #777;
-      font-size: 14px;
+      margin-top: 30px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <div class="container">
+
     <div class="title-bar">File: Viral Dance Clip (MixDrop)</div>
 
-    <!-- Video Embed Player (MixDrop iframe) -->
     <div class="player-wrapper">
-      <iframe src="https://mxdrop.to/e/xw0vlv3xce1rql" allowfullscreen></iframe>
+      <iframe 
+        src="https://mxdrop.to/e/xw0vlv3xce1rql"
+        allowfullscreen>
+      </iframe>
     </div>
 
-    <!-- Bottom Outstream Ad -->
     <div class="ad-bottom">
-      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
-      <ins class="eas6a97888e37" data-zoneid="5619476"></ins>
+      <!-- Your Monetag Ad Code -->
+      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script> 
+      <ins class="eas6a97888e37" data-zoneid="5619476"></ins> 
       <script>
         (AdProvider = window.AdProvider || []).push({"serve": {}});
       </script>
     </div>
+
   </div>
 </body>
 </html>
