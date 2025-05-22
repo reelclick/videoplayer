@@ -14,7 +14,7 @@
     .player-wrapper { width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.1); position: relative; margin-bottom: 10px; }
     .player-wrapper iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
     .warning { color: #ff4d4d; font-size: 14px; margin-top: 10px; text-align: center; font-weight: bold; }
-    .ad-video-slider { text-align: center; margin-top: 20px; }
+    .ad-video-slider { text-align: center; margin-top: 20px; visibility: hidden; }
     .fullscreen-lock {
       position: fixed;
       top: 0; left: 0;
@@ -64,7 +64,7 @@
 </div>
 <div class="warning">Tap many time on play button to play the video</div>
 
-<div class="ad-video-slider" id="sliderAd" style="display: none;">
+<div class="ad-video-slider" id="sliderAd">
   <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
   <ins class="eas6a97888e31" data-zoneid="5619516"></ins>
   <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
@@ -99,7 +99,7 @@
           clearInterval(countdown);
           overlay.style.display = 'none';
           iframe.style.pointerEvents = 'auto';
-          document.getElementById('sliderAd').style.display = 'block';
+          document.getElementById('sliderAd').style.visibility = 'visible';
         }
       }, 1000);
     });
