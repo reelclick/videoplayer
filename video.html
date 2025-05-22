@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Watch Video - FileHub.live</title>
@@ -11,6 +10,7 @@
     body { margin: 0; background: #000; color: #fff; font-family: Arial, sans-serif; }
     .container { max-width: 720px; margin: 0 auto; padding: 16px; position: relative; }
     .title-bar { font-size: 1.3rem; font-weight: bold; margin-bottom: 8px; text-align: center; }
+    .ad-top { text-align: center; margin-bottom: 20px; }
     .player-wrapper { width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.1); position: relative; margin-bottom: 10px; }
     .player-wrapper iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
     .timer-box { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; }
@@ -23,32 +23,35 @@
 </head>
 <body>
   <div class="container">
-    <div class="title-bar">Video Player</div>
-    <div class="player-wrapper">
-      <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
-    </div>
-    <div class="timer-box" id="timerBox">
-      <div class="countdown-circle" id="timer">20</div>
-      <div class="timer-text">Please wait... video will unlock</div>
-    </div>
-    <div class="warning">Tap many time on play button to play the video</div>
-    <div class="ad-video-slider">
+    <div class="ad-top">
       <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
-      <ins class="eas6a97888e31" data-zoneid="5619516"></ins>
+      <ins class="eas6a97888e37" data-zoneid="5619492"></ins>
       <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
-    </div>
-  </div>
-  <script>
+    </div><div class="title-bar">Video Player</div>
+<div class="player-wrapper">
+  <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
+</div>
+<div class="timer-box" id="timerBox">
+  <div class="countdown-circle" id="timer">20</div>
+  <div class="timer-text">Please wait... video will unlock</div>
+</div>
+<div class="warning">Tap many time on play button to play the video</div>
+<div class="ad-video-slider">
+  <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
+  <ins class="eas6a97888e31" data-zoneid="5619516"></ins>
+  <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
+</div>
+
+  </div>  <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
-  authDomain: "videoplayer-e9214.firebaseapp.com",
-  databaseURL: "https://videoplayer-e9214-default-rtdb.firebaseio.com",
-  projectId: "videoplayer-e9214",
-  storageBucket: "videoplayer-e9214.firebasestorage.app",
-  messagingSenderId: "129519902158",
-  appId: "1:129519902158:web:35db9dc21947cd3b881f9f",
-  measurementId: "G-R5Z49VZCB9"
-};
+      apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
+      authDomain: "videoplayer-e9214.firebaseapp.com",
+      databaseURL: "https://videoplayer-e9214-default-rtdb.firebaseio.com",
+      projectId: "videoplayer-e9214",
+      storageBucket: "videoplayer-e9214.firebasestorage.app",
+      messagingSenderId: "129519902158",
+      appId: "1:129519902158:web:35db9dc21947cd3b881f9f"
+    };
     firebase.initializeApp(firebaseConfig);
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
@@ -70,6 +73,5 @@
         }
       }, 1000);
     });
-  </script>
-</body>
+  </script></body>
 </html>
