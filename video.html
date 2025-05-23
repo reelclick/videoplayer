@@ -76,10 +76,10 @@
     <button id="searchBtn">Search</button>
   </div>  <div class="container">
     <div class="title-bar" id="videoTitleBar">Video Player</div>
-    <div class="player-wrapper">
+    <div class="player-wrapper" id="playerSection">
       <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
     </div>
-    <div class="warning">Tap many time on play button to play the video</div><div class="title-bar">Trending Videos</div>
+    <div class="warning" id="playerWarning">Tap many time on play button to play the video</div><div class="title-bar" id="sectionTitle">Trending Videos</div>
 <div class="video-grid" id="trendingList"></div>
 <div class="no-results" id="noResults" style="display:none;">No results found.</div>
 <button id="loadMoreBtn" style="display:none;">Load More</button>
@@ -114,6 +114,9 @@
       const noResults = document.getElementById('noResults');
       const loadMoreBtn = document.getElementById('loadMoreBtn');
       const searchBtn = document.getElementById('searchBtn');
+      const playerSection = document.getElementById('playerSection');
+      const playerWarning = document.getElementById('playerWarning');
+      const sectionTitle = document.getElementById('sectionTitle');
 
       let allCards = Object.entries(data || {}).map(([id, val]) => {
         const totalViews = (val.views || 0) + (val.organic || 0);
@@ -125,8 +128,18 @@
       function renderVideos(query = '') {
         trendingList.innerHTML = '';
         const results = allCards
-          .filter(v => (v.name || '').toLowerCase().includes(query.toLowerCase()))
+          .filter(v => (v.name || '').toLowerCase().includes(query.toLowerCase()) && v.id !== id)
           .sort((a, b) => b.totalViews - a.totalViews);
+
+        if (query) {
+          playerSection.style.display = 'none';
+          playerWarning.style.display = 'none';
+          sectionTitle.textContent = 'Search Results';
+        } else {
+          playerSection.style.display = 'block';
+          playerWarning.style.display = 'block';
+          sectionTitle.textContent = 'Trending Videos';
+        }
 
         if (results.length === 0) {
           noResults.style.display = 'block';
