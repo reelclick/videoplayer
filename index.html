@@ -70,6 +70,7 @@
 
           const iframe = document.createElement('iframe');
           iframe.src = data[id].embed;
+          iframe.sandbox = "allow-scripts allow-same-origin allow-presentation";
           iframe.allowFullscreen = true;
           iframe.sandbox = "allow-scripts allow-same-origin allow-presentation";
 
