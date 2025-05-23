@@ -7,42 +7,93 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
     body { font-family: Arial, sans-serif; background: #111; color: #fff; margin: 0; padding: 0; }
-    header { background: #ff4d4d; padding: 20px; text-align: center; color: white; font-size: 24px; font-weight: bold; position: sticky; top: 0; z-index: 1000; }
-    .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-    .search-sort { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; margin-bottom: 20px; }
-    .search-box input, .sort-box select { padding: 10px; font-size: 16px; border-radius: 4px; border: none; background: #222; color: white; }
-    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-    .video-card { background: #222; border-radius: 8px; padding: 16px; box-shadow: 0 0 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; }
-    .video-card iframe { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 6px; margin-bottom: 12px; pointer-events: none; }
-    .video-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; text-align: center; }
-    .video-category { font-size: 12px; text-align: center; color: #bbb; margin-top: -8px; margin-bottom: 12px; }
-    .video-actions { display: flex; justify-content: space-between; }
-    .video-actions button, .video-actions a {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 4px;
-      font-size: 14px;
-      cursor: pointer;
-      text-decoration: none;
-      color: #fff;
+    header {
+      background: #fff; color: #000;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
-    .view-btn { background: #28a745; }
-    .copy-btn { background: #17a2b8; }
-    .share-btn { background: #ffc107; color: #000; }
+    .search-box {
+      background: #fff;
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: center;
+    }
+    .search-box input {
+      width: 100%;
+      max-width: 600px;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      color: #000;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .video-card {
+      background: #222;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .video-card img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+    .video-info {
+      padding: 12px;
+    }
+    .video-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #fff;
+      text-decoration: none;
+      display: block;
+    }
+    .video-meta {
+      font-size: 14px;
+      color: #aaa;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .video-meta span {
+      background: #333;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    a { text-decoration: none; color: inherit; }
   </style>
 </head>
 <body>
-  <header>FileHub - Latest Video Library</header>
+  <header>FileHub</header>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search videos..." />
+  </div>
   <div class="container">
-    <div class="search-sort">
-      <input type="text" id="searchInput" placeholder="Search videos by name..." />
-      <select id="sortSelect">
-        <option value="latest">Latest First</option>
-        <option value="oldest">Oldest First</option>
-      </select>
-    </div>
     <div class="video-grid" id="videoList"></div>
-  </div>  <script>
+  </div>
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
       authDomain: "videoplayer-e9214.firebaseapp.com",
@@ -52,95 +103,76 @@
       messagingSenderId: "129519902158",
       appId: "1:129519902158:web:35db9dc21947cd3b881f9f"
     };
-    firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);function formatViews(views) {
+  return views > 999 ? (views/1000).toFixed(1) + 'k' : views;
+}
 
-    function loadVideos() {
-      const videoList = document.getElementById('videoList');
-      const searchInput = document.getElementById('searchInput');
-      const sortSelect = document.getElementById('sortSelect');
-      firebase.database().ref('videos').once('value').then(snapshot => {
-        const data = snapshot.val();
-        let allCards = [];
-        for (let id in data) {
-          const name = (data[id].name || 'Untitled Video').toLowerCase();
-          const timestamp = parseInt(id.replace('vid', ''));
+function loadVideos() {
+  const videoList = document.getElementById('videoList');
+  const searchInput = document.getElementById('searchInput');
+  firebase.database().ref('videos').once('value').then(snapshot => {
+    const data = snapshot.val();
+    let allCards = [];
+    for (let id in data) {
+      const name = (data[id].name || 'Untitled Video').toLowerCase();
+      const timestamp = parseInt(id.replace('vid', ''));
+      const views = data[id].views || Math.floor(Math.random()*10000 + 100);
+      const time = data[id].time || (Math.floor(Math.random()*10)+5) + ' min';
 
-          const card = document.createElement('div');
-          card.className = 'video-card';
+      const card = document.createElement('div');
+      card.className = 'video-card';
 
-          const iframe = document.createElement('iframe');
-          // iframe removed for thumbnail fallback
-          const previewImg = document.createElement('img');
-          previewImg.src = data[id].thumb || 'https://via.placeholder.com/480x270/000000/FFFFFF?text=No+Preview';
-          previewImg.alt = data[id].name;
-          previewImg.style.width = '100%';
-          previewImg.style.borderRadius = '6px';
-          previewImg.style.aspectRatio = '16 / 9';
-          iframe.allowFullscreen = true;
-          iframe.sandbox = "allow-scripts allow-same-origin allow-presentation";
+      const link = document.createElement('a');
+      link.href = `video.html?id=${id}`;
+      link.target = '_blank';
 
-          const title = document.createElement('div');
-          title.className = 'video-title';
-          title.textContent = data[id].name || 'Untitled Video';
+      const img = document.createElement('img');
+      img.src = data[id].thumb || 'https://via.placeholder.com/480x270/000000/FFFFFF?text=No+Preview';
+      link.appendChild(img);
 
-          const category = document.createElement('div');
-          category.className = 'video-category';
-          category.textContent = 'General';
+      const info = document.createElement('div');
+      info.className = 'video-info';
 
-          const actions = document.createElement('div');
-          actions.className = 'video-actions';
+      const title = document.createElement('span');
+      title.className = 'video-title';
+      title.textContent = data[id].name || 'Untitled Video';
 
-          const viewBtn = document.createElement('a');
-          viewBtn.href = `video.html?id=${id}`;
-          viewBtn.target = '_blank';
-          viewBtn.className = 'view-btn';
-          viewBtn.textContent = '▶ View';
+      const meta = document.createElement('div');
+      meta.className = 'video-meta';
 
-          const copyBtn = document.createElement('button');
-          copyBtn.className = 'copy-btn';
-          copyBtn.textContent = '📋 Copy Link';
-          copyBtn.onclick = () => navigator.clipboard.writeText(window.location.origin + `/video.html?id=${id}`);
+      const viewsText = document.createElement('span');
+      viewsText.textContent = formatViews(views) + ' Views';
 
-          const shareBtn = document.createElement('button');
-          shareBtn.className = 'share-btn';
-          shareBtn.textContent = '🔗 Share';
-          shareBtn.onclick = () => {
-            const url = encodeURIComponent(window.location.origin + `/video.html?id=${id}`);
-            const text = encodeURIComponent(data[id].name);
-            window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
-          }
+      const timeText = document.createElement('span');
+      timeText.textContent = time;
 
-          actions.appendChild(viewBtn);
-          actions.appendChild(copyBtn);
-          actions.appendChild(shareBtn);
+      meta.appendChild(viewsText);
+      meta.appendChild(timeText);
 
-          const linkWrap = document.createElement('a');
-          linkWrap.href = `video.html?id=${id}`;
-          linkWrap.target = '_blank';
-          linkWrap.appendChild(previewImg);
-          linkWrap.appendChild(title);
-          card.appendChild(linkWrap);
+      info.appendChild(title);
+      info.appendChild(meta);
+      link.appendChild(info);
+      card.appendChild(link);
 
-          allCards.push({ id, name, timestamp, element: card });
-        }
-
-        function renderFiltered() {
-          const query = searchInput.value.toLowerCase();
-          const sort = sortSelect.value;
-          let filtered = allCards.filter(c => c.name.includes(query));
-          if (sort === 'latest') filtered.sort((a, b) => b.timestamp - a.timestamp);
-          else filtered.sort((a, b) => a.timestamp - b.timestamp);
-
-          videoList.innerHTML = '';
-          filtered.forEach(c => videoList.appendChild(c.element));
-        }
-
-        searchInput.addEventListener('input', renderFiltered);
-        sortSelect.addEventListener('change', renderFiltered);
-        renderFiltered();
-      });
+      allCards.push({ id, name, timestamp, element: card });
     }
 
-    loadVideos();
-  </script></body>
+    function renderFiltered() {
+      const query = searchInput.value.toLowerCase();
+      let filtered = allCards.filter(c => c.name.includes(query));
+      filtered.sort((a, b) => b.timestamp - a.timestamp);
+
+      videoList.innerHTML = '';
+      filtered.forEach(c => videoList.appendChild(c.element));
+    }
+
+    searchInput.addEventListener('input', renderFiltered);
+    renderFiltered();
+  });
+}
+
+loadVideos();
+
+  </script>
+</body>
 </html>
