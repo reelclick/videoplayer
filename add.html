@@ -47,7 +47,8 @@
   if (!link) return;
   const id = 'vid' + Date.now();
   db.ref('videos/' + id).set({ embed: link, name: name, thumb: thumb, time: time, views: views }, () => {
-    document.getElementById('link').innerHTML = `✅ Link: <a style='color:#4dfc91' href='video.html?id=${id}' target='_blank'>video.html?id=${id}</a> <button onclick=\"navigator.clipboard.writeText(window.location.origin + '/video.html?id=${id}')\">📋 Copy</button>`;
+    const fullLink = `https://reelclick.in/video.html?id=${id}`;
+    document.getElementById('link').innerHTML = `✅ Link: <a style='color:#4dfc91' href='${fullLink}' target='_blank'>${fullLink}</a> <button onclick=\"navigator.clipboard.writeText('${fullLink}')\">📋 Copy</button>`;
     document.getElementById('embedLink').value = "";
     document.getElementById('fileName').value = "";
     document.getElementById('thumbLink').value = "";
@@ -99,7 +100,7 @@ function loadVideos() {
       actions.className = 'actions';
 
       const viewBtn = document.createElement('a');
-      viewBtn.href = `video.html?id=${id}`;
+      viewBtn.href = `https://reelclick.in/video.html?id=${id}`;
       viewBtn.target = '_blank';
       viewBtn.textContent = '▶️ View';
       viewBtn.style.marginRight = '10px';
@@ -115,7 +116,7 @@ function loadVideos() {
 
       const copyBtn = document.createElement('button');
       copyBtn.textContent = '📋 Copy';
-      copyBtn.onclick = () => navigator.clipboard.writeText(window.location.origin + `/video.html?id=${id}`);
+      copyBtn.onclick = () => navigator.clipboard.writeText(`https://reelclick.in/video.html?id=${id}`);
 
       actions.appendChild(viewBtn);
       actions.appendChild(saveBtn);
