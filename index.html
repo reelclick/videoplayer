@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
   <meta charset="UTF-8">
   <title>FileHub - Explore Latest Videos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -116,8 +115,8 @@ function loadVideos() {
     for (let id in data) {
       const name = (data[id].name || 'Untitled Video').toLowerCase();
       const timestamp = parseInt(id.replace('vid', ''));
-      const views = data[id].views || Math.floor(Math.random()*10000 + 100);
-      const time = data[id].time || (Math.floor(Math.random()*10)+5) + ' min';
+      const views = data[id].views || 0;
+      const time = data[id].time || '---';
 
       const card = document.createElement('div');
       card.className = 'video-card';
