@@ -56,12 +56,15 @@
       background: #333; padding: 2px 8px;
       border-radius: 4px; font-size: 13px;
     }
+    .no-results {
+      text-align: center; font-size: 16px; color: #bbb; margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <header><a href="index.html">FileHub</a></header>
   <div class="search-box">
-    <input type="text" placeholder="Search videos..." disabled />
+    <input type="text" placeholder="Search videos..." id="searchInput" />
   </div>  <div class="container">
     <div class="title-bar" id="videoTitleBar">Video Player</div>
     <div class="player-wrapper">
@@ -69,6 +72,7 @@
     </div>
     <div class="warning">Tap many time on play button to play the video</div><div class="title-bar">Trending Videos</div>
 <div class="video-grid" id="trendingList"></div>
+<div class="no-results" id="noResults" style="display:none;">No results found.</div>
 
   </div>  <script>
     const firebaseConfig = {
@@ -96,51 +100,68 @@
     firebase.database().ref('videos').once('value').then(snapshot => {
       const data = snapshot.val();
       const trendingList = document.getElementById('trendingList');
+      const searchInput = document.getElementById('searchInput');
+      const noResults = document.getElementById('noResults');
 
-      Object.entries(data || {})
-        .map(([id, val]) => {
-          const totalViews = (val.views || 0) + (val.organic || 0);
-          return { id, ...val, totalViews };
-        })
-        .filter(v => v.totalViews)
-        .sort((a, b) => b.totalViews - a.totalViews)
-        .slice(0, 50)
-        .forEach(v => {
-          const card = document.createElement('div');
-          card.className = 'video-card';
+      let allCards = Object.entries(data || {}).map(([id, val]) => {
+        const totalViews = (val.views || 0) + (val.organic || 0);
+        return { id, ...val, totalViews };
+      });
 
-          const link = document.createElement('a');
-          link.href = `video.html?id=${v.id}`;
-          link.target = '_blank';
+      function renderVideos(query = '') {
+        trendingList.innerHTML = '';
+        const results = allCards
+          .filter(v => (v.name || '').toLowerCase().includes(query.toLowerCase()))
+          .sort((a, b) => b.totalViews - a.totalViews)
+          .slice(0, 50);
 
-          const img = document.createElement('img');
-          img.src = v.thumb || 'https://via.placeholder.com/480x270/000000/FFFFFF?text=No+Preview';
-          link.appendChild(img);
+        if (results.length === 0) {
+          noResults.style.display = 'block';
+        } else {
+          noResults.style.display = 'none';
+          results.forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'video-card';
 
-          const info = document.createElement('div');
-          info.className = 'video-info';
+            const link = document.createElement('a');
+            link.href = `video.html?id=${v.id}`;
+            link.target = '_blank';
 
-          const title = document.createElement('span');
-          title.className = 'video-title';
-          title.textContent = v.name || 'Untitled Video';
+            const img = document.createElement('img');
+            img.src = v.thumb || 'https://via.placeholder.com/480x270/000000/FFFFFF?text=No+Preview';
+            link.appendChild(img);
 
-          const meta = document.createElement('div');
-          meta.className = 'video-meta';
+            const info = document.createElement('div');
+            info.className = 'video-info';
 
-          const viewsText = document.createElement('span');
-          viewsText.textContent = (v.totalViews > 999 ? (v.totalViews / 1000).toFixed(1) + 'k' : v.totalViews) + ' Views';
+            const title = document.createElement('span');
+            title.className = 'video-title';
+            title.textContent = v.name || 'Untitled Video';
 
-          const timeText = document.createElement('span');
-          timeText.textContent = (v.time || '---') + ' Duration';
+            const meta = document.createElement('div');
+            meta.className = 'video-meta';
 
-          meta.appendChild(viewsText);
-          meta.appendChild(timeText);
-          info.appendChild(title);
-          info.appendChild(meta);
-          link.appendChild(info);
-          card.appendChild(link);
-          trendingList.appendChild(card);
-        });
+            const viewsText = document.createElement('span');
+            viewsText.textContent = (v.totalViews > 999 ? (v.totalViews / 1000).toFixed(1) + 'k' : v.totalViews) + ' Views';
+
+            const timeText = document.createElement('span');
+            timeText.textContent = (v.time || '---') + ' Duration';
+
+            meta.appendChild(viewsText);
+            meta.appendChild(timeText);
+            info.appendChild(title);
+            info.appendChild(meta);
+            link.appendChild(info);
+            card.appendChild(link);
+            trendingList.appendChild(card);
+          });
+        }
+      }
+
+      renderVideos();
+      searchInput.addEventListener('input', () => {
+        renderVideos(searchInput.value);
+      });
     });
   </script></body>
 </html>
