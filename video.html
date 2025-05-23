@@ -8,8 +8,21 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
     body { margin: 0; background: #000; color: #fff; font-family: Arial, sans-serif; overflow-x: hidden; }
+    header {
+      background: #fff; color: #000;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
     .container { max-width: 720px; margin: 0 auto; padding: 16px; position: relative; }
-    .title-bar { font-size: 1.3rem; font-weight: bold; margin-bottom: 8px; text-align: center; }
+    .title-bar { font-size: 1.3rem; font-weight: bold; margin: 12px 0; text-align: center; }
     .ad-top { text-align: center; margin-bottom: 20px; opacity: 0.4; pointer-events: none; }
     .player-wrapper { width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.1); position: relative; margin-bottom: 10px; }
     .player-wrapper iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
@@ -28,81 +41,37 @@
       font-size: 22px; font-weight: bold; animation: pulse 1s infinite;
       margin-top: 12px;
     }
-    .search-bar {
-      margin: 30px auto 15px;
-      text-align: center;
-    }
-    .search-bar input {
-      padding: 10px;
-      width: 80%;
-      max-width: 400px;
-      border-radius: 25px;
-      border: none;
-      font-size: 16px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-    .card {
-      background: #222;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
-    .card img {
-      width: 100%;
-      display: block;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-    .card:hover img {
-      transform: scale(1.05);
-    }
-    .info {
-      padding: 10px;
-    }
-    .info span {
-      display: block;
-      font-size: 14px;
-      color: #aaa;
-      margin-top: 6px;
-    }
-    .info strong {
-      color: #fff;
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
+  <header>FileHub</header>
   <div class="fullscreen-lock" id="fullscreenLock">
     Page is locked<br>
     <div class="countdown-circle" id="timer">20</div>
-  </div>  <div class="container">
+  </div>
+  <div class="container">
     <div class="ad-top" id="topAd">
       <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
       <ins class="eas6a97888e37" data-zoneid="5619492"></ins>
       <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
-    </div><div class="title-bar">Video Player</div>
-<div class="player-wrapper">
-  <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
-</div>
-<div class="warning">Tap many time on play button to play the video</div>
-<div class="ad-video-slider" id="sliderAd">
-  <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
-  <ins class="eas6a97888e31" data-zoneid="5619516"></ins>
-  <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
-</div>
-
-<div class="title-bar" style="margin-top:40px">🔥 Trending Videos</div>
-<div class="search-bar">
-  <input type="text" id="searchInput" placeholder="Search trending...">
-</div>
-<div class="grid" id="trendingList"></div>
-
-  </div>  <script>
+    </div>
+    <div class="title-bar">Video Player</div>
+    <div class="player-wrapper">
+      <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
+    </div>
+    <div class="warning">Tap many time on play button to play the video</div>
+    <div class="ad-video-slider" id="sliderAd">
+      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
+      <ins class="eas6a97888e31" data-zoneid="5619516"></ins>
+      <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
+    </div>
+  </div>
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
       authDomain: "videoplayer-e9214.firebaseapp.com",
@@ -113,71 +82,35 @@
       appId: "1:129519902158:web:35db9dc21947cd3b881f9f"
     };
     firebase.initializeApp(firebaseConfig);
-
     const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id');
+    const id = urlParams.get('id');firebase.database().ref('videos/' + id + '/views').transaction(current => {
+  return (current || 0) + 1;
+});
 
-    firebase.database().ref('videos/' + id + '/views').transaction(current => {
-      return (current || 0) + 1;
-    });
-    firebase.database().ref('videos/' + id).update({ organic: true });
+firebase.database().ref('videos/' + id).once('value').then(snapshot => {
+  const embedLink = snapshot.val()?.embed;
+  if (!embedLink) return alert('Invalid or missing video.');
+  const iframe = document.getElementById('videoPlayer');
+  iframe.src = embedLink;
 
-    firebase.database().ref('videos/' + id).once('value').then(snapshot => {
-      const embedLink = snapshot.val()?.embed;
-      if (!embedLink) return alert('Invalid or missing video.');
-      const iframe = document.getElementById('videoPlayer');
-      iframe.src = embedLink;
+  let seconds = 20;
+  const overlay = document.getElementById('fullscreenLock');
+  const timer = document.getElementById('timer');
+  const countdown = setInterval(() => {
+    seconds--;
+    timer.textContent = seconds;
+    if (seconds <= 0) {
+      clearInterval(countdown);
+      overlay.style.display = 'none';
+      iframe.style.pointerEvents = 'auto';
+      document.getElementById('sliderAd').style.opacity = '1';
+      document.getElementById('sliderAd').style.pointerEvents = 'auto';
+      document.getElementById('topAd').style.opacity = '1';
+      document.getElementById('topAd').style.pointerEvents = 'auto';
+    }
+  }, 1000);
+});
 
-      let seconds = 20;
-      const overlay = document.getElementById('fullscreenLock');
-      const timer = document.getElementById('timer');
-      const countdown = setInterval(() => {
-        seconds--;
-        timer.textContent = seconds;
-        if (seconds <= 0) {
-          clearInterval(countdown);
-          overlay.style.display = 'none';
-          iframe.style.pointerEvents = 'auto';
-          document.getElementById('sliderAd').style.opacity = '1';
-          document.getElementById('sliderAd').style.pointerEvents = 'auto';
-          document.getElementById('topAd').style.opacity = '1';
-          document.getElementById('topAd').style.pointerEvents = 'auto';
-        }
-      }, 1000);
-    });
-
-    firebase.database().ref('videos').once('value').then(snapshot => {
-      const data = snapshot.val();
-      const trending = Object.entries(data || {})
-        .filter(([id, vid]) => vid.organic)
-        .sort((a, b) => (b[1].views || 0) - (a[1].views || 0))
-        .slice(0, 50);
-
-      const searchInput = document.getElementById('searchInput');
-      const trendingList = document.getElementById('trendingList');
-
-      function render() {
-        const query = searchInput.value.toLowerCase();
-        trendingList.innerHTML = '';
-        trending.forEach(([id, video]) => {
-          if (!video.name.toLowerCase().includes(query)) return;
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <a href="video.html?id=${id}" target="_blank">
-              <img src="${video.thumb || 'https://via.placeholder.com/480x270/000000/FFFFFF?text=No+Preview'}">
-              <div class="info">
-                <strong>${video.name || 'Untitled'}</strong>
-                <span>${(video.views || 0).toLocaleString()} views</span>
-                <span>Duration: ${video.time || '---'}</span>
-              </div>
-            </a>
-          `;
-          trendingList.appendChild(card);
-        });
-      }
-      searchInput.addEventListener('input', render);
-      render();
-    });
-  </script></body>
+  </script>
+</body>
 </html>
