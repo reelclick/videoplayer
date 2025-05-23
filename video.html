@@ -15,6 +15,7 @@
       display: flex; justify-content: center; font-size: 24px;
       font-weight: bold; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000;
     }
+    header a { color: #000; text-decoration: none; }
     .search-box {
       background: #fff; padding: 10px 20px; border-bottom: 1px solid #ccc; display: flex; justify-content: center;
     }
@@ -23,7 +24,7 @@
       font-size: 16px; color: #000;
     }
     .container { max-width: 720px; margin: 0 auto; padding: 16px; position: relative; }
-    .title-bar { font-size: 1.3rem; font-weight: bold; margin: 30px 0 12px; text-align: center; }
+    .title-bar { font-size: 1.3rem; font-weight: bold; margin-bottom: 12px; text-align: center; margin-top: 30px; }
     .player-wrapper { width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px;
       box-shadow: 0 0 10px rgba(255,255,255,0.1); margin-bottom: 10px;
     }
@@ -59,7 +60,7 @@
   </style>
 </head>
 <body>
-  <header>FileHub</header>
+  <header><a href="index.html">FileHub</a></header>
   <div class="search-box">
     <input type="text" placeholder="Search videos..." disabled />
   </div>
