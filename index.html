@@ -108,8 +108,12 @@
           actions.appendChild(copyBtn);
           actions.appendChild(shareBtn);
 
-          card.appendChild(iframe);
-          card.appendChild(title);
+          const linkWrap = document.createElement('a');
+          linkWrap.href = `video.html?id=${id}`;
+          linkWrap.target = '_blank';
+          linkWrap.appendChild(iframe);
+          linkWrap.appendChild(title);
+          card.appendChild(linkWrap);
 
           allCards.push({ id, name, timestamp, element: card });
         }
