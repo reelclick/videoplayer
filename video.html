@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Watch Video - FileHub.live</title>
@@ -63,20 +62,15 @@
   <header><a href="index.html">FileHub</a></header>
   <div class="search-box">
     <input type="text" placeholder="Search videos..." disabled />
-  </div>
-
-  <div class="container">
+  </div>  <div class="container">
     <div class="title-bar">Video Player</div>
     <div class="player-wrapper">
       <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
     </div>
-    <div class="warning">Tap many time on play button to play the video</div>
+    <div class="warning">Tap many time on play button to play the video</div><div class="title-bar">Trending Videos</div>
+<div class="video-grid" id="trendingList"></div>
 
-    <div class="title-bar">Trending Videos</div>
-    <div class="video-grid" id="trendingList"></div>
-  </div>
-
-  <script>
+  </div>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
       authDomain: "videoplayer-e9214.firebaseapp.com",
@@ -90,7 +84,7 @@
 
     const id = new URLSearchParams(window.location.search).get('id');
 
-    firebase.database().ref('videos/' + id + '/views').transaction(v => (v || 0) + 1);
+    firebase.database().ref('videos/' + id + '/organic').transaction(v => (v || 0) + 1);
 
     firebase.database().ref('videos/' + id).once('value').then(snapshot => {
       const embed = snapshot.val()?.embed;
@@ -103,9 +97,12 @@
       const trendingList = document.getElementById('trendingList');
 
       Object.entries(data || {})
-        .map(([id, val]) => ({ id, ...val }))
-        .filter(v => v.views)
-        .sort((a, b) => b.views - a.views)
+        .map(([id, val]) => {
+          const totalViews = (val.views || 0) + (val.organic || 0);
+          return { id, ...val, totalViews };
+        })
+        .filter(v => v.totalViews)
+        .sort((a, b) => b.totalViews - a.totalViews)
         .slice(0, 50)
         .forEach(v => {
           const card = document.createElement('div');
@@ -130,7 +127,7 @@
           meta.className = 'video-meta';
 
           const viewsText = document.createElement('span');
-          viewsText.textContent = ((v.views || 0) > 999 ? (v.views / 1000).toFixed(1) + 'k' : v.views) + ' Views';
+          viewsText.textContent = (v.totalViews > 999 ? (v.totalViews / 1000).toFixed(1) + 'k' : v.totalViews) + ' Views';
 
           const timeText = document.createElement('span');
           timeText.textContent = (v.time || '---') + ' Duration';
@@ -144,6 +141,5 @@
           trendingList.appendChild(card);
         });
     });
-  </script>
-</body>
+  </script></body>
 </html>
