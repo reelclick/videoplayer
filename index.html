@@ -1,74 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Watch Video - FileHub.live</title>
+  <title>FileHub - Explore Latest Videos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="6a97888e-site-verification" content="21b919f2ba8ad5fa768287f5f9f36822">
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
-    body { margin: 0; background: #000; color: #fff; font-family: Arial, sans-serif; }
-    .container { max-width: 720px; margin: 0 auto; padding: 16px; position: relative; }
-    .title-bar { font-size: 1.3rem; font-weight: bold; margin-bottom: 8px; text-align: center; }
-    .player-wrapper { width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.1); position: relative; margin-bottom: 10px; }
-    .player-wrapper iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
-    .timer-box { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; }
-    .countdown-circle { width: 80px; height: 80px; border-radius: 50%; background-color: #ff4d4d; display: flex; align-items: center; justify-content: center; font-size: 20px; animation: pulse 1s infinite; margin-bottom: 8px; }
-    .timer-text { font-size: 14px; color: #ddd; }
-    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
-    .warning { color: #ff4d4d; font-size: 14px; margin-top: 10px; text-align: center; font-weight: bold; }
-    .ad-video-slider { text-align: center; margin-top: 20px; }
+    body { font-family: Arial, sans-serif; background: #111; color: #fff; margin: 0; padding: 0; }
+    header { background: #ff4d4d; padding: 20px; text-align: center; color: white; font-size: 24px; font-weight: bold; }
+    .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .video-card { background: #222; border-radius: 8px; padding: 16px; box-shadow: 0 0 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; }
+    .video-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; }
+    .video-actions { display: flex; justify-content: space-between; }
+    .video-actions button, .video-actions a {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #fff;
+    }
+    .view-btn { background: #28a745; }
+    .copy-btn { background: #17a2b8; }
   </style>
 </head>
 <body>
+  <header>FileHub - Latest Video Library</header>
   <div class="container">
-    <div class="title-bar">Video Player</div>
-    <div class="player-wrapper">
-      <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
-    </div>
-    <div class="timer-box" id="timerBox">
-      <div class="countdown-circle" id="timer">20</div>
-      <div class="timer-text">Please wait... video will unlock</div>
-    </div>
-    <div class="warning">Tap many time on play button to play the video</div>
-    <div class="ad-video-slider">
-      <script async type="application/javascript" src="https://a.magsrv.com/ad-provider.js"></script>
-      <ins class="eas6a97888e31" data-zoneid="5619516"></ins>
-      <script>(AdProvider = window.AdProvider || []).push({"serve": {}});</script>
-    </div>
-  </div>
-  <script>
+    <div class="video-grid" id="videoList"></div>
+  </div>  <script>
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyB9rvEdcBskD3b-YHebiRz3DptRNhTcQ9Y",
+      authDomain: "videoplayer-e9214.firebaseapp.com",
+      databaseURL: "https://videoplayer-e9214-default-rtdb.firebaseio.com",
+      projectId: "videoplayer-e9214",
+      storageBucket: "videoplayer-e9214.firebasestorage.app",
+      messagingSenderId: "129519902158",
+      appId: "1:129519902158:web:35db9dc21947cd3b881f9f"
     };
     firebase.initializeApp(firebaseConfig);
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id');
-    firebase.database().ref('videos/' + id).once('value').then(snapshot => {
-      const embedLink = snapshot.val()?.embed;
-      if (!embedLink) return alert('Invalid or missing video.');
-      const iframe = document.getElementById('videoPlayer');
-      iframe.src = embedLink;
-      let seconds = 20;
-      const timerBox = document.getElementById('timerBox');
-      const timer = document.getElementById('timer');
-      const countdown = setInterval(() => {
-        seconds--;
-        timer.textContent = seconds;
-        if (seconds <= 0) {
-          clearInterval(countdown);
-          timerBox.style.display = 'none';
-          iframe.style.pointerEvents = 'auto';
+
+    function loadVideos() {
+      const videoList = document.getElementById('videoList');
+      firebase.database().ref('videos').once('value').then(snapshot => {
+        const data = snapshot.val();
+        videoList.innerHTML = '';
+        for (let id in data) {
+          const card = document.createElement('div');
+          card.className = 'video-card';
+
+          const title = document.createElement('div');
+          title.className = 'video-title';
+          title.textContent = data[id].name || 'Untitled Video';
+
+          const actions = document.createElement('div');
+          actions.className = 'video-actions';
+
+          const viewBtn = document.createElement('a');
+          viewBtn.href = `video.html?id=${id}`;
+          viewBtn.target = '_blank';
+          viewBtn.className = 'view-btn';
+          viewBtn.textContent = '▶ View';
+
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'copy-btn';
+          copyBtn.textContent = '📋 Copy Link';
+          copyBtn.onclick = () => navigator.clipboard.writeText(window.location.origin + `/video.html?id=${id}`);
+
+          actions.appendChild(viewBtn);
+          actions.appendChild(copyBtn);
+          card.appendChild(title);
+          card.appendChild(actions);
+          videoList.appendChild(card);
         }
-      }, 1000);
-    });
-  </script>
-</body>
+      });
+    }
+
+    loadVideos();
+  </script></body>
 </html>
