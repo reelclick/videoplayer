@@ -9,8 +9,10 @@
     body { font-family: Arial, sans-serif; background: #111; color: #fff; margin: 0; padding: 0; }
     header { background: #ff4d4d; padding: 20px; text-align: center; color: white; font-size: 24px; font-weight: bold; }
     .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+    #searchBar { width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 6px; border: none; font-size: 16px; }
     .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
     .video-card { background: #222; border-radius: 8px; padding: 16px; box-shadow: 0 0 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; }
+    .video-thumbnail { width: 100%; height: 160px; background-color: #333; background-size: cover; background-position: center; border-radius: 6px; margin-bottom: 12px; }
     .video-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; }
     .video-actions { display: flex; justify-content: space-between; }
     .video-actions button, .video-actions a {
@@ -29,6 +31,7 @@
 <body>
   <header>FileHub - Latest Video Library</header>
   <div class="container">
+    <input type="text" id="searchBar" placeholder="Search videos by title..." oninput="filterVideos()">
     <div class="video-grid" id="videoList"></div>
   </div>  <script>
     const firebaseConfig = {
@@ -42,40 +45,64 @@
     };
     firebase.initializeApp(firebaseConfig);
 
+    let videoData = {};
+
     function loadVideos() {
       const videoList = document.getElementById('videoList');
       firebase.database().ref('videos').once('value').then(snapshot => {
-        const data = snapshot.val();
-        videoList.innerHTML = '';
-        for (let id in data) {
-          const card = document.createElement('div');
-          card.className = 'video-card';
-
-          const title = document.createElement('div');
-          title.className = 'video-title';
-          title.textContent = data[id].name || 'Untitled Video';
-
-          const actions = document.createElement('div');
-          actions.className = 'video-actions';
-
-          const viewBtn = document.createElement('a');
-          viewBtn.href = `video.html?id=${id}`;
-          viewBtn.target = '_blank';
-          viewBtn.className = 'view-btn';
-          viewBtn.textContent = '▶ View';
-
-          const copyBtn = document.createElement('button');
-          copyBtn.className = 'copy-btn';
-          copyBtn.textContent = '📋 Copy Link';
-          copyBtn.onclick = () => navigator.clipboard.writeText(window.location.origin + `/video.html?id=${id}`);
-
-          actions.appendChild(viewBtn);
-          actions.appendChild(copyBtn);
-          card.appendChild(title);
-          card.appendChild(actions);
-          videoList.appendChild(card);
-        }
+        videoData = snapshot.val();
+        renderVideos(videoData);
       });
+    }
+
+    function renderVideos(data) {
+      const videoList = document.getElementById('videoList');
+      videoList.innerHTML = '';
+      for (let id in data) {
+        const card = document.createElement('div');
+        card.className = 'video-card';
+
+        const thumb = document.createElement('div');
+        thumb.className = 'video-thumbnail';
+        thumb.style.backgroundImage = `url('https://dummyimage.com/640x360/333/fff&text=${data[id].name ? encodeURIComponent(data[id].name) : 'No+Preview'}')`;
+
+        const title = document.createElement('div');
+        title.className = 'video-title';
+        title.textContent = data[id].name || 'Untitled Video';
+
+        const actions = document.createElement('div');
+        actions.className = 'video-actions';
+
+        const viewBtn = document.createElement('a');
+        viewBtn.href = `video.html?id=${id}`;
+        viewBtn.target = '_blank';
+        viewBtn.className = 'view-btn';
+        viewBtn.textContent = '▶ View';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.textContent = '📋 Copy Link';
+        copyBtn.onclick = () => navigator.clipboard.writeText(window.location.origin + `/video.html?id=${id}`);
+
+        actions.appendChild(viewBtn);
+        actions.appendChild(copyBtn);
+
+        card.appendChild(thumb);
+        card.appendChild(title);
+        card.appendChild(actions);
+        videoList.appendChild(card);
+      }
+    }
+
+    function filterVideos() {
+      const query = document.getElementById('searchBar').value.toLowerCase();
+      const filtered = {};
+      for (let id in videoData) {
+        if ((videoData[id].name || '').toLowerCase().includes(query)) {
+          filtered[id] = videoData[id];
+        }
+      }
+      renderVideos(filtered);
     }
 
     loadVideos();
