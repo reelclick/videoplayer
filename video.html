@@ -16,11 +16,15 @@
     }
     header a { color: #000; text-decoration: none; }
     .search-box {
-      background: #fff; padding: 10px 20px; border-bottom: 1px solid #ccc; display: flex; justify-content: center;
+      background: #fff; padding: 10px 20px; border-bottom: 1px solid #ccc; display: flex; justify-content: center; gap: 10px;
     }
     .search-box input {
       width: 100%; max-width: 600px; padding: 10px; border-radius: 20px; border: 1px solid #ccc;
       font-size: 16px; color: #000;
+    }
+    .search-box button {
+      background: #ff4d4d; color: #fff; padding: 10px 20px; border: none;
+      border-radius: 20px; font-size: 16px; cursor: pointer;
     }
     .container { max-width: 720px; margin: 0 auto; padding: 16px; position: relative; }
     .title-bar { font-size: 1.3rem; font-weight: bold; margin-bottom: 12px; text-align: center; margin-top: 30px; }
@@ -69,6 +73,7 @@
   <header><a href="index.html">FileHub</a></header>
   <div class="search-box">
     <input type="text" placeholder="Search videos..." id="searchInput" />
+    <button id="searchBtn">Search</button>
   </div>  <div class="container">
     <div class="title-bar" id="videoTitleBar">Video Player</div>
     <div class="player-wrapper">
@@ -108,6 +113,7 @@
       const searchInput = document.getElementById('searchInput');
       const noResults = document.getElementById('noResults');
       const loadMoreBtn = document.getElementById('loadMoreBtn');
+      const searchBtn = document.getElementById('searchBtn');
 
       let allCards = Object.entries(data || {}).map(([id, val]) => {
         const totalViews = (val.views || 0) + (val.organic || 0);
@@ -170,17 +176,22 @@
         }
       }
 
-      renderVideos();
-
-      searchInput.addEventListener('input', () => {
+      function handleSearch() {
         displayLimit = 12;
         renderVideos(searchInput.value);
+      }
+
+      searchInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') handleSearch();
       });
 
+      searchBtn.addEventListener('click', handleSearch);
       loadMoreBtn.addEventListener('click', () => {
         displayLimit += 12;
         renderVideos(searchInput.value);
       });
+
+      renderVideos();
     });
   </script></body>
 </html>
