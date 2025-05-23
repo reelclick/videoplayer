@@ -20,6 +20,7 @@
   <input type="text" id="fileName" placeholder="Enter File Name (optional)" />
   <input type="text" id="embedLink" placeholder="Enter MixDrop Embed URL" />
   <input type="text" id="thumbLink" placeholder="Enter Preview Image URL (optional)" />
+  <input type="text" id="videoTime" placeholder="Enter Duration (e.g., 14 min)" />
   <button onclick="addVideo()">Generate Video Link</button>
   <div id="link"></div>
   <h3>Existing Videos</h3>
@@ -39,19 +40,22 @@
   const link = document.getElementById('embedLink').value;
   const name = document.getElementById('fileName').value || 'Untitled';
   const thumb = document.getElementById('thumbLink').value;
+  const time = document.getElementById('videoTime').value;
+  const views = Math.floor(Math.random() * 1000000 + 500000);
   if (!link) return;
   const id = 'vid' + Date.now();
-  db.ref('videos/' + id).set({ embed: link, name: name, thumb: thumb }, () => {
+  db.ref('videos/' + id).set({ embed: link, name: name, thumb: thumb, time: time, views: views }, () => {
     document.getElementById('link').innerHTML = `✅ Link: <a style='color:#4dfc91' href='video.html?id=${id}' target='_blank'>video.html?id=${id}</a> <button onclick=\"navigator.clipboard.writeText(window.location.origin + '/video.html?id=${id}')\">📋 Copy</button>`;
     document.getElementById('embedLink').value = "";
     document.getElementById('fileName').value = "";
     document.getElementById('thumbLink').value = "";
+    document.getElementById('videoTime').value = "";
     loadVideos();
   });
 }
 
-function updateVideo(id, newLink, newName, newThumb) {
-  db.ref('videos/' + id).update({ embed: newLink, name: newName, thumb: newThumb }, () => {
+function updateVideo(id, newLink, newName, newThumb, newTime) {
+  db.ref('videos/' + id).update({ embed: newLink, name: newName, thumb: newThumb, time: newTime }, () => {
     loadVideos();
   });
 }
@@ -82,6 +86,9 @@ function loadVideos() {
       const thumbInput = document.createElement('input');
       thumbInput.value = data[id].thumb || '';
 
+      const timeInput = document.createElement('input');
+      timeInput.value = data[id].time || '';
+
       const actions = document.createElement('div');
       actions.className = 'actions';
 
@@ -94,7 +101,7 @@ function loadVideos() {
 
       const saveBtn = document.createElement('button');
       saveBtn.textContent = '💾 Save';
-      saveBtn.onclick = () => updateVideo(id, embedInput.value, nameInput.value, thumbInput.value);
+      saveBtn.onclick = () => updateVideo(id, embedInput.value, nameInput.value, thumbInput.value, timeInput.value);
 
       const deleteBtn = document.createElement('button');
       deleteBtn.textContent = '🗑️ Delete';
@@ -112,6 +119,7 @@ function loadVideos() {
       entry.appendChild(nameInput);
       entry.appendChild(embedInput);
       entry.appendChild(thumbInput);
+      entry.appendChild(timeInput);
       entry.appendChild(actions);
       list.appendChild(entry);
     }
