@@ -59,6 +59,10 @@
     .no-results {
       text-align: center; font-size: 16px; color: #bbb; margin-top: 20px;
     }
+    #loadMoreBtn {
+      background: #ff4d4d; border: none; color: #fff; padding: 10px 20px; margin: 20px auto; display: block;
+      border-radius: 5px; font-size: 16px; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -73,6 +77,7 @@
     <div class="warning">Tap many time on play button to play the video</div><div class="title-bar">Trending Videos</div>
 <div class="video-grid" id="trendingList"></div>
 <div class="no-results" id="noResults" style="display:none;">No results found.</div>
+<button id="loadMoreBtn" style="display:none;">Load More</button>
 
   </div>  <script>
     const firebaseConfig = {
@@ -102,24 +107,29 @@
       const trendingList = document.getElementById('trendingList');
       const searchInput = document.getElementById('searchInput');
       const noResults = document.getElementById('noResults');
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
 
       let allCards = Object.entries(data || {}).map(([id, val]) => {
         const totalViews = (val.views || 0) + (val.organic || 0);
         return { id, ...val, totalViews };
       });
 
+      let displayLimit = 12;
+
       function renderVideos(query = '') {
         trendingList.innerHTML = '';
         const results = allCards
           .filter(v => (v.name || '').toLowerCase().includes(query.toLowerCase()))
-          .sort((a, b) => b.totalViews - a.totalViews)
-          .slice(0, 50);
+          .sort((a, b) => b.totalViews - a.totalViews);
 
         if (results.length === 0) {
           noResults.style.display = 'block';
+          loadMoreBtn.style.display = 'none';
         } else {
           noResults.style.display = 'none';
-          results.forEach(v => {
+          const visible = results.slice(0, displayLimit);
+
+          visible.forEach(v => {
             const card = document.createElement('div');
             card.className = 'video-card';
 
@@ -155,11 +165,20 @@
             card.appendChild(link);
             trendingList.appendChild(card);
           });
+
+          loadMoreBtn.style.display = results.length > displayLimit ? 'block' : 'none';
         }
       }
 
       renderVideos();
+
       searchInput.addEventListener('input', () => {
+        displayLimit = 12;
+        renderVideos(searchInput.value);
+      });
+
+      loadMoreBtn.addEventListener('click', () => {
+        displayLimit += 12;
         renderVideos(searchInput.value);
       });
     });
