@@ -63,7 +63,7 @@
   <div class="search-box">
     <input type="text" placeholder="Search videos..." disabled />
   </div>  <div class="container">
-    <div class="title-bar">Video Player</div>
+    <div class="title-bar" id="videoTitleBar">Video Player</div>
     <div class="player-wrapper">
       <iframe id="videoPlayer" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
     </div>
@@ -87,9 +87,10 @@
     firebase.database().ref('videos/' + id + '/organic').transaction(v => (v || 0) + 1);
 
     firebase.database().ref('videos/' + id).once('value').then(snapshot => {
-      const embed = snapshot.val()?.embed;
-      if (!embed) return alert('Invalid or missing video.');
-      document.getElementById('videoPlayer').src = embed;
+      const data = snapshot.val();
+      if (!data?.embed) return alert('Invalid or missing video.');
+      document.getElementById('videoPlayer').src = data.embed;
+      document.getElementById('videoTitleBar').textContent = data.name || 'Untitled Video';
     });
 
     firebase.database().ref('videos').once('value').then(snapshot => {
