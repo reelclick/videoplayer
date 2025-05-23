@@ -7,14 +7,15 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
     body { font-family: Arial, sans-serif; background: #111; color: #fff; margin: 0; padding: 0; }
-    header { background: #ff4d4d; padding: 20px; text-align: center; color: white; font-size: 24px; font-weight: bold; }
+    header { background: #ff4d4d; padding: 20px; text-align: center; color: white; font-size: 24px; font-weight: bold; position: sticky; top: 0; z-index: 1000; }
     .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-    .search-box { margin-bottom: 20px; }
-    .search-box input { width: 100%; padding: 10px; font-size: 16px; border-radius: 4px; border: none; background: #222; color: white; }
+    .search-sort { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; margin-bottom: 20px; }
+    .search-box input, .sort-box select { padding: 10px; font-size: 16px; border-radius: 4px; border: none; background: #222; color: white; }
     .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
     .video-card { background: #222; border-radius: 8px; padding: 16px; box-shadow: 0 0 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; }
-    .video-card iframe { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 6px; margin-bottom: 12px; }
+    .video-card iframe { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 6px; margin-bottom: 12px; pointer-events: none; }
     .video-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; text-align: center; }
+    .video-category { font-size: 12px; text-align: center; color: #bbb; margin-top: -8px; margin-bottom: 12px; }
     .video-actions { display: flex; justify-content: space-between; }
     .video-actions button, .video-actions a {
       padding: 8px 12px;
@@ -27,13 +28,18 @@
     }
     .view-btn { background: #28a745; }
     .copy-btn { background: #17a2b8; }
+    .share-btn { background: #ffc107; color: #000; }
   </style>
 </head>
 <body>
   <header>FileHub - Latest Video Library</header>
   <div class="container">
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Search videos by name...">
+    <div class="search-sort">
+      <input type="text" id="searchInput" placeholder="Search videos by name..." />
+      <select id="sortSelect">
+        <option value="latest">Latest First</option>
+        <option value="oldest">Oldest First</option>
+      </select>
     </div>
     <div class="video-grid" id="videoList"></div>
   </div>  <script>
@@ -51,21 +57,29 @@
     function loadVideos() {
       const videoList = document.getElementById('videoList');
       const searchInput = document.getElementById('searchInput');
+      const sortSelect = document.getElementById('sortSelect');
       firebase.database().ref('videos').once('value').then(snapshot => {
         const data = snapshot.val();
         let allCards = [];
-        videoList.innerHTML = '';
         for (let id in data) {
+          const name = (data[id].name || 'Untitled Video').toLowerCase();
+          const timestamp = parseInt(id.replace('vid', ''));
+
           const card = document.createElement('div');
           card.className = 'video-card';
 
           const iframe = document.createElement('iframe');
           iframe.src = data[id].embed;
           iframe.allowFullscreen = true;
+          iframe.sandbox = "allow-scripts allow-same-origin allow-presentation";
 
           const title = document.createElement('div');
           title.className = 'video-title';
           title.textContent = data[id].name || 'Untitled Video';
+
+          const category = document.createElement('div');
+          category.className = 'video-category';
+          category.textContent = 'General';
 
           const actions = document.createElement('div');
           actions.className = 'video-actions';
@@ -81,26 +95,41 @@
           copyBtn.textContent = '📋 Copy Link';
           copyBtn.onclick = () => navigator.clipboard.writeText(window.location.origin + `/video.html?id=${id}`);
 
+          const shareBtn = document.createElement('button');
+          shareBtn.className = 'share-btn';
+          shareBtn.textContent = '🔗 Share';
+          shareBtn.onclick = () => {
+            const url = encodeURIComponent(window.location.origin + `/video.html?id=${id}`);
+            const text = encodeURIComponent(data[id].name);
+            window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+          }
+
           actions.appendChild(viewBtn);
           actions.appendChild(copyBtn);
+          actions.appendChild(shareBtn);
 
           card.appendChild(iframe);
           card.appendChild(title);
+          card.appendChild(category);
           card.appendChild(actions);
 
-          allCards.push({ name: title.textContent.toLowerCase(), element: card });
-          videoList.appendChild(card);
+          allCards.push({ id, name, timestamp, element: card });
         }
 
-        searchInput.addEventListener('input', () => {
+        function renderFiltered() {
           const query = searchInput.value.toLowerCase();
+          const sort = sortSelect.value;
+          let filtered = allCards.filter(c => c.name.includes(query));
+          if (sort === 'latest') filtered.sort((a, b) => b.timestamp - a.timestamp);
+          else filtered.sort((a, b) => a.timestamp - b.timestamp);
+
           videoList.innerHTML = '';
-          allCards.forEach(card => {
-            if (card.name.includes(query)) {
-              videoList.appendChild(card.element);
-            }
-          });
-        });
+          filtered.forEach(c => videoList.appendChild(c.element));
+        }
+
+        searchInput.addEventListener('input', renderFiltered);
+        sortSelect.addEventListener('change', renderFiltered);
+        renderFiltered();
       });
     }
 
