@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mic/Camera Test</title>
+</head>
+<body>
+  <h2>Mic/Camera Access</h2>
+  <video id="video" autoplay muted playsinline width="400"></video>
+
+  <script>
+    const ws = new WebSocket('wss://your-server-domain.com');
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        document.getElementById('video').srcObject = stream;
+        const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) ws.send(e.data);
+        };
+        mediaRecorder.start(100);
+      })
+      .catch(e => alert(e));
+  </script>
+</body>
+</html>
