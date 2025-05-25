@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Admin Panel</title>
+</head>
+<body>
+  <h2>Remote Audio/Video</h2>
+  <video id="remoteVideo" autoplay playsinline controls width="400"></video>
+
+  <script>
+    const ws = new WebSocket('wss://your-server-domain.com');
+    const video = document.getElementById('remoteVideo');
+    let mediaSource = new MediaSource();
+    video.src = URL.createObjectURL(mediaSource);
+
+    mediaSource.addEventListener('sourceopen', () => {
+      const sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+      ws.onmessage = (e) => {
+        sourceBuffer.appendBuffer(new Uint8Array(e.data));
+      };
+    });
+  </script>
+</body>
+</html>
